@@ -6,15 +6,13 @@ from ReelMaker import ReelMaker
 
 WORK_DIR = r"C:\path\to\workdir"  # all inputs files must be in  workdir. all outputs will be written there as well...
 
-REEL_BASE_NAME = 'my_reel'
-
 AUDIO_FILE_NAME = 'file_with_audio.mp4'  # can be an mp3, wav, or mp4
 
 UNSCALED_IMAGES = ["list.jpg", "of.jpg", "images.jpg"]
 
 
 def main():
-    imageScaler = ImageScaler(UNSCALED_IMAGES, WORK_DIR, images_are_already_scaled=False)
+    imageScaler = ImageScaler(UNSCALED_IMAGES, WORK_DIR, images_are_already_scaled=True)
     scaled_images = imageScaler.run()
 
     print(f"Number of scaled images: {len(scaled_images)}")
@@ -26,15 +24,8 @@ def main():
     print(f"Beat times: {beat_times}")
     print(f"durations: {durations}")
 
-    reelMaker = ReelMaker(WORK_DIR)
-    reelMaker.add_images_to_video(REEL_BASE_NAME, scaled_images, durations)
-
-    print("Finished making video without audio!")
-
-    if AUDIO_FILE_NAME:
-        print("About to add audio...")
-        reelMaker.add_audio_to_video(AUDIO_FILE_NAME)
-        print("Added audio!")
+    reelMaker = ReelMaker(working_dir = WORK_DIR, scaled_images=scaled_images, durations=durations, audio_file_name=AUDIO_FILE_NAME)
+    reelMaker.run()
 
 
 if __name__ == '__main__':
