@@ -21,8 +21,8 @@ def main():
     beat_times = beatEvaluator.run()
     durations = beatEvaluator.eval_durations_from_beat_times(beat_times)
 
-    print(f"Beat times: {beat_times}")
-    print(f"durations: {durations}")
+    print(f"Beat-times ({len(beat_times)}): {beat_times}")
+    print(f"Durations ({len(durations)}): {durations}")
 
     reelMaker = ReelMaker(working_dir = WORK_DIR, scaled_images=scaled_images, durations=durations, audio_file_name=AUDIO_FILE_NAME)
     reelMaker.run()
