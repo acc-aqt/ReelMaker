@@ -14,15 +14,13 @@ class ImageScaler:
         self.unscaled_images = unscaled_images
         self.images_are_already_scaled = images_are_already_scaled
 
-        self.scaled_images = []
+        self.scaled_images = [f.split(".")[0] + "_scaled." + f.split(".")[1] for f in self.unscaled_images]
 
     def run(self):
         if not self.images_are_already_scaled:
             self.__remove_already_scaled_images()
-        width, height = self.__get_width_hight_to_scale()
-        for image in self.unscaled_images:
-            scaled_image = self.__scale_image(image, width, height)
-            self.scaled_images.append(scaled_image)
+            width, height = self.__get_width_hight_to_scale()
+            self.__scale_images(width, height)
 
         logging.debug(f"Number of scaled images: {len(self.scaled_images)}")
         return self.scaled_images
@@ -38,36 +36,31 @@ class ImageScaler:
 
     def __get_width_hight_to_scale(self, scale_type="fixed"):
         if scale_type == "fixed":  # height 1920 px ; aspect ratio 9:16
-            min_height = 1920
-            min_width = int(min_height * 9 / 16)
-            return min_width, min_height
-
-        if scale_type == "fit2smallest":  # scale all images to image with smallest height
-            min_width = 1e9
-            min_height = 1e9
+            height_to_scale = 1920
+            width_to_scale = int(height_to_scale * 9 / 16)
+        elif scale_type == "fit2smallest":  # scale all images to image with smallest height
+            width_to_scale = 1e9
+            height_to_scale = 1e9
             for image in self.unscaled_images:
                 frame = cv2.imread(os.path.join(self.working_dir, image))
                 height, width, layers = frame.shape
-                if height < min_height:
-                    min_height = height
-                    min_width = width
+                if height < height_to_scale:
+                    height_to_scale = height
+                    width_to_scale = width
+        else:
+            raise NotImplementedError(f"Scale Type {scale_type} not supported!!")
 
-            return min_width, min_height
-
-        raise NotImplementedError(f"Scale Type {scale_type} not supported!!")
+        logging.debug(f"Images will be scaled to width {width_to_scale} / height {height_to_scale}")
+        return width_to_scale, height_to_scale
 
     # ToDo: could be a static method
-    # ToDO both scales images and gives the filenames...
-    def __scale_image(self, file_name, width, height):
-        basename = file_name.split(".")[0]
-        suffix = file_name.split(".")[1]
-        new_filename = basename + "_scaled." + suffix
-
-        if not self.images_are_already_scaled:
+    def __scale_images(self, width, height):
+        logging.info("About to scale images...")
+        for file_name, new_filename in zip(self.unscaled_images, self.scaled_images):
             image = Image.open(os.path.join(self.working_dir, file_name))
             new_image = image.resize((width, height))
             path_scaled_image = os.path.join(self.working_dir, new_filename)
             new_image.save(path_scaled_image, quality=self.QUALITY)
             logging.debug(f"Saved scaled image {path_scaled_image}")
-
+        logging.info("Finished scaling of images!")
         return new_filename

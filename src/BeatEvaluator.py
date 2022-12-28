@@ -46,15 +46,14 @@ class BeatEvaluator:
         elif self.path_to_input_file.endswith(".mp4"):
             my_clip = mpe.VideoFileClip(self.path_to_input_file)  # r"downloaded_reel.mp4"
             my_clip.audio.write_audiofile(self.__path_to_temp_wav_file)
-            logging.info("Converted .mp4 to .wav")
+            logging.info("Finished conversion!")
         elif self.path_to_input_file.endswith(".mp3"):
             # ToDo: not sure if this works already...
             sound = AudioSegment.from_mp3(self.path_to_input_file)
             sound.export(self.__path_to_temp_wav_file, format="wav")
+            logging.info("Finished conversion!")
         else:
             raise NotImplementedError(f"Filetype of {self.path_to_input_file} not supported for beat time evaluation")
-
-        logging.info("Finished conversion!")
 
     def __remove_temp_wav(self):
         if os.path.isfile(self.__path_to_temp_wav_file):
