@@ -1,3 +1,4 @@
+import logging
 import os
 
 import cv2
@@ -23,16 +24,17 @@ class ImageScaler:
             scaled_image = self.__scale_image(image, width, height)
             self.scaled_images.append(scaled_image)
 
+        logging.debug(f"Number of scaled images: {len(self.scaled_images)}")
         return self.scaled_images
 
     def __remove_already_scaled_images(self):
-        print("Removing all already scaled images...")
+        logging.info("Removing all already scaled images...")
         scaled_images_to_remove = [img for img in os.listdir(self.working_dir) if
                                    img.endswith(".jpg") and "scaled" in img]
         for image_to_remove in scaled_images_to_remove:
             filepath = os.path.join(self.working_dir, image_to_remove)
             os.remove(filepath)
-            print(f"Removed {filepath}")
+            logging.debug(f"Removed {filepath}")
 
     def __get_width_hight_to_scale(self, scale_type="fixed"):
         if scale_type == "fixed":  # height 1920 px ; aspect ratio 9:16
@@ -66,6 +68,6 @@ class ImageScaler:
             new_image = image.resize((width, height))
             path_scaled_image = os.path.join(self.working_dir, new_filename)
             new_image.save(path_scaled_image, quality=self.QUALITY)
-            print(f"Wrote scaled file {path_scaled_image}")
+            logging.debug(f"Saved scaled image {path_scaled_image}")
 
         return new_filename

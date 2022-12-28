@@ -1,3 +1,4 @@
+import logging
 import os
 from itertools import cycle, islice
 
@@ -23,20 +24,17 @@ class ReelMaker:
     def run(self):
         self.__stack_images_to_video()
 
-
         if self.audio_file_name:
-            print("About to add audio...")
             self.__add_audio_to_video()
-            print("Added audio!")
 
     def __stack_images_to_video(self):
-        print("Stack images to make video (without audio)...")
-
         path_to_video_without_audio = os.path.join(self.working_dir, self.filename_video_without_audio)
 
         if os.path.isfile(path_to_video_without_audio):
             os.remove(path_to_video_without_audio)
-            print(f"Removed file {path_to_video_without_audio}")
+            logging.debug(f"Removed file {path_to_video_without_audio}")
+
+        logging.info("Stack images to make video (without audio)...")
 
         frame = cv2.imread(os.path.join(self.working_dir, self.scaled_images[0]))
         height, width, _ = frame.shape
@@ -50,34 +48,35 @@ class ReelMaker:
         counter = 0
         looped_scaled_images = list(islice(cycle(self.scaled_images), len(self.durations)))
         for duration in self.durations:
-            print(f"Stack image {counter +1} / {len(self.durations)}...")
+            logging.debug(f"Stack image {counter +1} / {len(self.durations)}...")
             frames = int(duration * self.FRAMES_PER_SECOND)
             for frame in range(frames):
                 video.write(cv2.imread(os.path.join(self.working_dir, looped_scaled_images[counter])))
             counter += 1
 
-
-        print("Finished stacking!")
+        logging.debug("Finished stacking!")
         cv2.destroyAllWindows()
         video.release()
-        print("Released video (without audio)...")
+        logging.info(f"Released video (without audio) "
+                     f"--> {os.path.join(self.working_dir, self.filename_video_without_audio)}")
 
     def __add_audio_to_video(self):
+        logging.info("About to add audio...")
 
         path_to_video_with_audio = os.path.join(self.working_dir, self.filename_video_with_audio)
 
         if os.path.isfile(path_to_video_with_audio):
             os.remove(path_to_video_with_audio)
-            print(f"Removed file {path_to_video_with_audio}")
+            logging.debug(f"Removed file {path_to_video_with_audio}")
 
         videoclip = mpe.VideoFileClip(os.path.join(self.working_dir, self.filename_video_without_audio))
         audioclip = mpe.AudioFileClip(os.path.join(self.working_dir, self.audio_file_name))
 
         total_duration = min(videoclip.duration,
                              audioclip.duration)
-        print(f"Video-Duration: {videoclip.duration}; "
-              f"Audio Duration: {audioclip.duration} "
-              f"--> crop both to {total_duration}")
+        logging.debug(f"Video-Duration: {videoclip.duration}; "
+                      f"Audio Duration: {audioclip.duration} "
+                      f"--> crop both to {total_duration}")
 
         audioclip = audioclip.subclip(0, total_duration)
         videoclip = videoclip.subclip(0, total_duration)
@@ -89,4 +88,4 @@ class ReelMaker:
         videoclip.close()
         videoclip_with_audio.close()
 
-        print(f"Wrote file {path_to_video_with_audio}")
+        logging.info(f"Wrote file with audio --> {path_to_video_with_audio}")
