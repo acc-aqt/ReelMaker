@@ -21,15 +21,16 @@ class ReelMaker:
         self.filename_video_with_audio = self.video_base_name + "_WITH_AUDIO_" + audio_file_base_name + self.VIDEO_EXTENSION
 
     def run(self):
-        self.__add_images_to_video()
-        print("Finished making video without audio!")
+        self.__stack_images_to_video()
+
 
         if self.audio_file_name:
             print("About to add audio...")
             self.__add_audio_to_video()
             print("Added audio!")
 
-    def __add_images_to_video(self, loop_until_audio_ends=True):
+    def __stack_images_to_video(self):
+        print("Stack images to make video (without audio)...")
 
         path_to_video_without_audio = os.path.join(self.working_dir, self.filename_video_without_audio)
 
@@ -46,35 +47,20 @@ class ReelMaker:
                                 self.FRAMES_PER_SECOND,
                                 (width, height))
 
-        if loop_until_audio_ends:
-            counter = 0
-            looped_scaled_images = list(islice(cycle(self.scaled_images), len(self.durations)))
-            for duration in self.durations:
-                print(f"Stack image {counter +1} / {len(self.durations)}...")
-                frames = int(duration * self.FRAMES_PER_SECOND)
-                for frame in range(frames):
-                    video.write(cv2.imread(os.path.join(self.working_dir, looped_scaled_images[counter])))
-                counter += 1
-        else:  # each image just once --> nu,ber of images may not be larger than number of durations
+        counter = 0
+        looped_scaled_images = list(islice(cycle(self.scaled_images), len(self.durations)))
+        for duration in self.durations:
+            print(f"Stack image {counter +1} / {len(self.durations)}...")
+            frames = int(duration * self.FRAMES_PER_SECOND)
+            for frame in range(frames):
+                video.write(cv2.imread(os.path.join(self.working_dir, looped_scaled_images[counter])))
+            counter += 1
 
-            if len(self.scaled_images) > len(self.durations):
-                scaled_images_sliced = self.scaled_images[:len(self.durations)]
-                print(f"Scaled images now has length  {len(scaled_images_sliced)}")
-            else:
-                scaled_images_sliced = self.scaled_images
-
-            counter = 0
-            for image in scaled_images_sliced:
-                print(f"Stack image {counter +1} / {len(scaled_images_sliced)}...")
-                frames = int(self.durations[counter] * self.FRAMES_PER_SECOND)
-                for frame in range(frames):
-                    video.write(cv2.imread(os.path.join(self.working_dir, image)))
-                counter += 1
 
         print("Finished stacking!")
         cv2.destroyAllWindows()
         video.release()
-        print("Released video!")
+        print("Released video (without audio)...")
 
     def __add_audio_to_video(self):
 
