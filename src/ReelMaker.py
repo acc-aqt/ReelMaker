@@ -10,16 +10,15 @@ class ReelMaker:
     VIDEO_EXTENSION = ".mp4"  # reels work best with mp4
     FRAMES_PER_SECOND = 100
 
-    def __init__(self, working_dir, scaled_images, durations, audio_file_name="", base_name="reel"):
+    def __init__(self, working_dir, images, durations, audio_file_name="", base_name="reel"):
         self.working_dir = working_dir
-        self.video_base_name = base_name
-        self.scaled_images = scaled_images
+        self.images = images
         self.durations = durations
         self.audio_file_name = audio_file_name
 
         audio_file_base_name = self.audio_file_name.split(".")[0]
-        self.filename_video_without_audio = self.video_base_name + "_TEMP_NO_AUDIO_" + audio_file_base_name + self.VIDEO_EXTENSION
-        self.filename_video_with_audio = self.video_base_name + "_WITH_AUDIO_" + audio_file_base_name + self.VIDEO_EXTENSION
+        self.video_without_audio = base_name + "_TEMP_NO_AUDIO_" + audio_file_base_name + self.VIDEO_EXTENSION
+        self.video_with_audio = base_name + "_WITH_AUDIO_" + audio_file_base_name + self.VIDEO_EXTENSION
 
     def run(self):
         self.__stack_images_to_video()
@@ -28,7 +27,7 @@ class ReelMaker:
             self.__add_audio_to_video()
 
     def __stack_images_to_video(self):
-        path_to_video_without_audio = os.path.join(self.working_dir, self.filename_video_without_audio)
+        path_to_video_without_audio = os.path.join(self.working_dir, self.video_without_audio)
 
         if os.path.isfile(path_to_video_without_audio):
             os.remove(path_to_video_without_audio)
@@ -36,40 +35,42 @@ class ReelMaker:
 
         logging.info("Stack images to make video (without audio)...")
 
-        frame = cv2.imread(os.path.join(self.working_dir, self.scaled_images[0]))
-        height, width, _ = frame.shape
+        height, width = self.get_height_width()
 
         fourcc = cv2.VideoWriter_fourcc(*'MP4V')  # only mp4 seems to works
 
-        video = cv2.VideoWriter(os.path.join(self.working_dir, self.filename_video_without_audio), fourcc,
+        video = cv2.VideoWriter(os.path.join(self.working_dir, self.video_without_audio), fourcc,
                                 self.FRAMES_PER_SECOND,
                                 (width, height))
 
-        counter = 0
-        looped_scaled_images = list(islice(cycle(self.scaled_images), len(self.durations)))
-        for duration in self.durations:
-            logging.debug(f"Stack image {counter +1} / {len(self.durations)}...")
+        images_to_stack = list(islice(cycle(self.images), len(self.durations))) # repeat list of images until all durations are used
+        for i, duration in enumerate(self.durations):
+            logging.debug(f"Stack image {i +1} / {len(self.durations)}...")
             frames = int(duration * self.FRAMES_PER_SECOND)
             for frame in range(frames):
-                video.write(cv2.imread(os.path.join(self.working_dir, looped_scaled_images[counter])))
-            counter += 1
+                video.write(cv2.imread(os.path.join(self.working_dir, images_to_stack[i])))
 
         logging.debug("Finished stacking!")
         cv2.destroyAllWindows()
         video.release()
         logging.info(f"Released video (without audio) "
-                     f"--> {os.path.join(self.working_dir, self.filename_video_without_audio)}")
+                     f"--> {os.path.join(self.working_dir, self.video_without_audio)}")
+
+    def get_height_width(self):
+        frame = cv2.imread(os.path.join(self.working_dir, self.images[0]))
+        height, width, _ = frame.shape
+        return height, width
 
     def __add_audio_to_video(self):
         logging.info("About to add audio...")
 
-        path_to_video_with_audio = os.path.join(self.working_dir, self.filename_video_with_audio)
+        path_to_video_with_audio = os.path.join(self.working_dir, self.video_with_audio)
 
         if os.path.isfile(path_to_video_with_audio):
             os.remove(path_to_video_with_audio)
             logging.debug(f"Removed file {path_to_video_with_audio}")
 
-        videoclip = mpe.VideoFileClip(os.path.join(self.working_dir, self.filename_video_without_audio))
+        videoclip = mpe.VideoFileClip(os.path.join(self.working_dir, self.video_without_audio))
         audioclip = mpe.AudioFileClip(os.path.join(self.working_dir, self.audio_file_name))
 
         total_duration = min(videoclip.duration,

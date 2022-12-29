@@ -6,18 +6,18 @@ from PIL import Image
 
 
 class ImageScaler:
-    QUALITY = 95  # could also be less, anything above q > 95 pointless...
+    SCALED_IMAGE_QUALITY = 95  # could also be less, anything above q > 95 pointless...
 
-    def __init__(self, unscaled_images, working_dir, images_are_already_scaled=False):
+    def __init__(self, unscaled_images, working_dir, use_already_scaled_images=False):
 
         self.working_dir = working_dir
         self.unscaled_images = unscaled_images
-        self.images_are_already_scaled = images_are_already_scaled
+        self.use_already_scaled_images = use_already_scaled_images
 
         self.scaled_images = [f.split(".")[0] + "_scaled." + f.split(".")[1] for f in self.unscaled_images]
 
     def run(self):
-        if not self.images_are_already_scaled:
+        if not self.use_already_scaled_images:
             self.__remove_already_scaled_images()
             width, height = self.__get_width_hight_to_scale()
             self.__scale_images(width, height)
@@ -60,7 +60,7 @@ class ImageScaler:
             image = Image.open(os.path.join(self.working_dir, file_name))
             new_image = image.resize((width, height))
             path_scaled_image = os.path.join(self.working_dir, new_filename)
-            new_image.save(path_scaled_image, quality=self.QUALITY)
+            new_image.save(path_scaled_image, quality=self.SCALED_IMAGE_QUALITY)
             logging.debug(f"Saved scaled image {path_scaled_image}")
         logging.info("Finished scaling of images!")
         return new_filename

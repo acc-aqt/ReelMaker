@@ -1,4 +1,5 @@
 import logging
+import math
 import os
 
 import librosa
@@ -27,13 +28,14 @@ class BeatEvaluator:
         return beat_times
 
     def __evaluate_beat_times_from_wav(self):
+        # from https://www.analyticsvidhya.com/blog/2018/02/audio-beat-tracking-for-music-information-retrieval/
+
         logging.info("Evaluate beat times from .wav...")
+
         x, sr = librosa.load(self.__path_to_temp_wav_file)  # only works with .wav...
-        # x, sr = librosa.load(path_to_audio_file)  # only works with .wav...
         ipd.Audio(x, rate=sr)
         tempo, beat_times = librosa.beat.beat_track(x, sr=sr, start_bpm=120, units='time')
-        # clicks = librosa.clicks(beat_times, sr=sr, length=len(x))
-        # ipd.Audio(x + clicks, rate=sr)
+
         logging.info(f"Evaluated {len(beat_times)} beat times from .wav: {beat_times}")
         return beat_times
 
@@ -66,3 +68,13 @@ class BeatEvaluator:
         durations = [beat_times[n] - beat_times[n - 1] for n in range(1, len(beat_times))]
         logging.info(f"Durations ({len(durations)}): {durations}")
         return durations
+
+    @staticmethod
+    def evaluate_beat_times_from_bpm(bpm, total_duration):
+        bps = bpm / 60
+        single_duration = 1 / bps
+        number_of_beats = math.floor(total_duration / single_duration)
+        beat_times = []
+        for i in range(1, 1 + number_of_beats):
+            beat_times.append(i * single_duration)
+        return beat_times

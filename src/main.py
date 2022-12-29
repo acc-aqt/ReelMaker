@@ -13,25 +13,31 @@ AUDIO_FILE_NAME = 'file_with_audio.mp4'  # can be an mp3, wav, or mp4
 
 UNSCALED_IMAGES = ["list.jpg", "of.jpg", "images.jpg"]
 
+LOG_LEVEL = logging.DEBUG
+
+USE_ALREADY_SCALED_IMAGES = True
 
 def setup_logger():
     now_string = datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
     logfile = f'make_reel_{now_string}.log'
-    logging.basicConfig(filename=os.path.join(WORK_DIR, logfile), level=logging.INFO)
+    logging.basicConfig(filename=os.path.join(WORK_DIR, logfile), level=LOG_LEVEL)
     logging.getLogger().addHandler(logging.StreamHandler(sys.stdout))
 
 
 def main():
     setup_logger()
 
-    imageScaler = ImageScaler(UNSCALED_IMAGES, WORK_DIR, images_are_already_scaled=False)
+    imageScaler = ImageScaler(UNSCALED_IMAGES, WORK_DIR, use_already_scaled_images=USE_ALREADY_SCALED_IMAGES)
     scaled_images = imageScaler.run()
 
     beatEvaluator = BeatEvaluator(os.path.join(WORK_DIR, AUDIO_FILE_NAME))
     beat_times = beatEvaluator.run()
-    durations = beatEvaluator.eval_durations_from_beat_times(beat_times)
 
-    reelMaker = ReelMaker(working_dir=WORK_DIR, scaled_images=scaled_images, durations=durations,
+    # beat_times = BeatEvaluator.evaluate_beat_times_from_bpm(bpm = 140.09, total_duration = 7.9)
+
+    durations = BeatEvaluator.eval_durations_from_beat_times(beat_times)
+
+    reelMaker = ReelMaker(working_dir=WORK_DIR, images=scaled_images, durations=durations,
                           audio_file_name=AUDIO_FILE_NAME)
     reelMaker.run()
 
