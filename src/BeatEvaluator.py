@@ -1,8 +1,11 @@
+import contextlib
 import logging
 import math
 import os
+import wave
 
 import librosa
+import numpy as np
 from IPython import display as ipd
 from moviepy import editor as mpe
 from pydub import AudioSegment
@@ -36,8 +39,19 @@ class BeatEvaluator:
         ipd.Audio(x, rate=sr)
         tempo, beat_times = librosa.beat.beat_track(x, sr=sr, start_bpm=120, units='time')
 
+        # append total duration as last beat in order to use whole length of audio
+        duration = self.__get_total_duration_from_wav()
+        beat_times = np.append(beat_times, duration)
+
         logging.info(f"Evaluated {len(beat_times)} beat times from .wav: {beat_times}")
         return beat_times
+
+    def __get_total_duration_from_wav(self):
+        with contextlib.closing(wave.open(self.__path_to_temp_wav_file, 'r')) as f:
+            frames = f.getnframes()
+            rate = f.getframerate()
+            duration = frames / float(rate)
+        return duration
 
     def __create_temp_wav(self):
         logging.info(f"About to convert {self.path_to_input_file} to {self.__path_to_temp_wav_file}...")
@@ -64,9 +78,12 @@ class BeatEvaluator:
 
     @staticmethod
     def eval_durations_from_beat_times(beat_times):
+        # ToDo: das geht schoener...
         beat_times = [0] + beat_times
         durations = [beat_times[n] - beat_times[n - 1] for n in range(1, len(beat_times))]
+        durations = [beat_times[0]] + durations
         logging.info(f"Durations ({len(durations)}): {durations}")
+        logging.debug(f"Total duration: {sum(durations)}")
         return durations
 
     @staticmethod
@@ -77,4 +94,5 @@ class BeatEvaluator:
         beat_times = []
         for i in range(1, 1 + number_of_beats):
             beat_times.append(i * single_duration)
+        beat_times.append(total_duration)  # append total duration as last beat in order to use whole length of audio
         return beat_times
