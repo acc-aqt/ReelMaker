@@ -1,7 +1,4 @@
 # ReelMaker
-A tool that builds instagram wheels from an audio-input and a set of images.
-
-## Usage
 
 Call `main.py` with `-h` / `--help` flag to get info about the ReelMaker's usage and arguments.
 
