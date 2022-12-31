@@ -24,10 +24,9 @@ def main():
     if args.beats_per_minute and args.length:
         beat_times = BeatEvaluator.evaluate_beat_times_from_bpm(bpm=args.beats_per_minute, length=args.length)
     else:
-        beatEvaluator = BeatEvaluator(args.audio)
-        beat_times = beatEvaluator.run()
+        beat_times = BeatEvaluator.evaluate_beat_times_from_audio_file(args.audio)
 
-    durations = BeatEvaluator.eval_durations_from_beat_times(beat_times)
+    durations = BeatEvaluator.evaluate_durations_from_beat_times(beat_times)
 
     reelMaker = ReelMaker(visuals=scaled_visuals, durations=durations,
                           audio_file_name=args.audio)
