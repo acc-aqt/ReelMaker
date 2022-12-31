@@ -17,12 +17,10 @@ class BeatEvaluator:
 
         self.path_to_input_file = path_to_audio_file
 
-        self.__workdir = os.path.dirname(self.path_to_input_file)
-
+        workdir = os.path.dirname(self.path_to_input_file)
         basename = os.path.splitext(os.path.basename(self.path_to_input_file))[0]
-        self.__temp_wav_file = "TEMP_" + basename + ".wav"
-
-        self.__path_to_temp_wav_file = os.path.join(self.__workdir, self.__temp_wav_file)
+        temp_wav_file = "TEMP_" + basename + ".wav"
+        self.__path_to_temp_wav_file = os.path.join(workdir, temp_wav_file)
 
     def run(self):
 
