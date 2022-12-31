@@ -24,10 +24,10 @@ def get_versioned_file_path(path):
         return path
 
     filename, extension = os.path.splitext(path)
-    version_conter = 2
+    version_counter = 2
 
     while os.path.exists(path):
-        path = filename + "_v" + str(version_conter) + extension
-        version_conter += 1
+        path = filename + "_v" + str(version_counter) + extension
+        version_counter += 1
 
     return path
