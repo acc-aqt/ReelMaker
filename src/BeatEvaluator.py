@@ -15,20 +15,14 @@ from helpers import remove_file
 
 class BeatEvaluator:
 
-    def __init__(self):
-        pass
-
     @staticmethod
     def evaluate_beat_times_from_audio_file(path_to_audio_file):
 
-        workdir = os.path.dirname(path_to_audio_file)
-        basename = os.path.splitext(os.path.basename(path_to_audio_file))[0]
-        temp_wav_file = "TEMP_" + basename + ".wav"
-        path_to_temp_wav_file = os.path.join(workdir, temp_wav_file)
+        path_to_temp_wav = BeatEvaluator.__get_path_to_temp_wav(path_to_audio_file)
+        BeatEvaluator.__create_temp_wav(path_to_audio_file, path_to_temp_wav)
+        beat_times = BeatEvaluator.__evaluate_beat_times_from_wav(path_to_temp_wav)
+        remove_file(path_to_temp_wav)
 
-        BeatEvaluator.__create_temp_wav(path_to_audio_file, path_to_temp_wav_file)
-        beat_times = BeatEvaluator.__evaluate_beat_times_from_wav(path_to_temp_wav_file)
-        remove_file(path_to_temp_wav_file)
         return beat_times
 
     @staticmethod
@@ -57,6 +51,35 @@ class BeatEvaluator:
         return durations
 
     @staticmethod
+    def __get_path_to_temp_wav(path_to_audio_file):
+        workdir = os.path.dirname(path_to_audio_file)
+        basename = os.path.splitext(os.path.basename(path_to_audio_file))[0]
+        temp_wav_file = "TEMP_" + basename + ".wav"
+        path_to_temp_wav_file = os.path.join(workdir, temp_wav_file)
+        return path_to_temp_wav_file
+
+    @staticmethod
+    def __create_temp_wav(path_to_audio_file, path_to_temp_wav):
+        remove_file(path_to_temp_wav)
+
+        logging.info(f"About to convert {path_to_audio_file} to {path_to_temp_wav}...")
+
+        if path_to_audio_file.endswith(".wav"):
+            logging.info("Audio file is .wav, so copy it to tempdir...")
+            raise NotImplementedError("Must be implemented")
+        elif path_to_audio_file.endswith(".mp4"):
+            my_clip = mpe.VideoFileClip(path_to_audio_file)  # r"downloaded_reel.mp4"
+            my_clip.audio.write_audiofile(path_to_temp_wav)
+            logging.info("Finished conversion!")
+        elif path_to_audio_file.endswith(".mp3"):
+            # ToDo: not sure if this works already...
+            sound = AudioSegment.from_mp3(path_to_audio_file)
+            sound.export(path_to_temp_wav, format="wav")
+            logging.info("Finished conversion!")
+        else:
+            raise NotImplementedError(f"Filetype of {path_to_audio_file} not supported for beat time evaluation")
+
+    @staticmethod
     def __evaluate_beat_times_from_wav(wav_file):
         # from https://www.analyticsvidhya.com/blog/2018/02/audio-beat-tracking-for-music-information-retrieval/
 
@@ -80,24 +103,3 @@ class BeatEvaluator:
             rate = f.getframerate()
             duration = frames / float(rate)
         return duration
-
-    @staticmethod
-    def __create_temp_wav(path_to_audio_file, path_to_temp_wav_file):
-        remove_file(path_to_temp_wav_file)
-
-        logging.info(f"About to convert {path_to_audio_file} to {path_to_temp_wav_file}...")
-
-        if path_to_audio_file.endswith(".wav"):
-            logging.info("Audio file is .wav, so copy it to tempdir...")
-            raise NotImplementedError("Must be implemented")
-        elif path_to_audio_file.endswith(".mp4"):
-            my_clip = mpe.VideoFileClip(path_to_audio_file)  # r"downloaded_reel.mp4"
-            my_clip.audio.write_audiofile(path_to_temp_wav_file)
-            logging.info("Finished conversion!")
-        elif path_to_audio_file.endswith(".mp3"):
-            # ToDo: not sure if this works already...
-            sound = AudioSegment.from_mp3(path_to_audio_file)
-            sound.export(path_to_temp_wav_file, format="wav")
-            logging.info("Finished conversion!")
-        else:
-            raise NotImplementedError(f"Filetype of {path_to_audio_file} not supported for beat time evaluation")
