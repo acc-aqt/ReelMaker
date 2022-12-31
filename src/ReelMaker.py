@@ -2,8 +2,9 @@ import logging
 import os
 from itertools import cycle, islice
 
-import cv2
 from moviepy import editor as mpe
+
+from helpers import is_image, is_video, get_lower_case_file_suffix
 
 
 class ReelMaker:
@@ -36,28 +37,31 @@ class ReelMaker:
 
         logging.info("Stack visuals to make video (without audio)...")
 
-        height, width = self.get_height_width()
+        clips = []
 
-        fourcc = cv2.VideoWriter_fourcc(*'MP4V')  # only mp4 seems to works
-
-        video = cv2.VideoWriter(self.video_without_audio, fourcc, self.FRAMES_PER_SECOND, (width, height))
-
-        visuals_to_stack = list(islice(cycle(self.visuals), len(self.durations))) # repeat list of visuals until all durations are used
+        visuals_to_stack = list(
+            islice(cycle(self.visuals), len(self.durations)))  # repeat list of visuals until all durations are used
         for i, duration in enumerate(self.durations):
-            logging.debug(f"Stack visual {i +1} / {len(self.durations)}...")
-            frames = int(duration * self.FRAMES_PER_SECOND)
-            for frame in range(frames):
-                video.write(cv2.imread(visuals_to_stack[i]))
+            visual = visuals_to_stack[i]
+            if is_image(visual):
+                image_clip = mpe.ImageClip(visual).set_duration(duration)
+                clips.append(image_clip)
+                image_clip.close()
+            elif is_video(visual):
+                clip_to_add = mpe.VideoFileClip(visual)
+                start_time = 0  # ToDo: pass start_time per clip as input?
+                clip_to_add = clip_to_add.subclip(start_time, start_time + duration)
+                clips.append(clip_to_add)
+                clip_to_add.close()
+            else:
+                file_suffix = get_lower_case_file_suffix(visual)
+                raise IOError(f"Stacking not implemented for files of type '{file_suffix}'. "
+                              f"File {visual} cannot be added to reel!")
 
-        logging.debug("Finished stacking!")
-        cv2.destroyAllWindows()
-        video.release()
+        video = mpe.concatenate_videoclips(clips)  # method = "compose" ?
+        video.write_videofile(self.video_without_audio, fps=60)  # ToDo: what fps to use?
+
         logging.info(f"Released video (without audio) --> {self.video_without_audio}")
-
-    def get_height_width(self):
-        frame = cv2.imread(self.visuals[0])
-        height, width, _ = frame.shape
-        return height, width
 
     def __add_audio_to_video(self):
         logging.info("About to add audio...")
@@ -67,7 +71,7 @@ class ReelMaker:
             logging.debug(f"Removed file {self.video_with_audio}")
 
         videoclip = mpe.VideoFileClip(self.video_without_audio)
-        audioclip = mpe.AudioFileClip( self.audio_file_name)
+        audioclip = mpe.AudioFileClip(self.audio_file_name)
 
         total_duration = min(videoclip.duration,
                              audioclip.duration)
