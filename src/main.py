@@ -3,9 +3,10 @@ import logging
 import os
 
 from BeatEvaluator import BeatEvaluator
-from VisualsScaler import VisualsScaler
 from ReelMaker import ReelMaker
+from VisualsScaler import VisualsScaler
 from setup_logger import LOG_LEVEL_INFO, LOG_LEVELS, setup_logger
+
 
 def main():
     args = parse_arguments()
@@ -60,36 +61,40 @@ def parse_arguments():
                   "so that the visuals are displayed according to the beat. " \
                   "Alternatively, the bpm / duration of the song can be specified."
     parser = argparse.ArgumentParser(prog="ReelMaker", description=description)
+    parser._action_groups.pop()
+
+    required = parser.add_argument_group('required arguments')
+    optional = parser.add_argument_group('optional arguments')
 
     #  ToDo also handle alread scaled visuals
-    parser.add_argument("-v", "--visuals", type=str, required=True,
-                        help="Comma-separated list of the unscaled (!) visuals, or alternatively the name of a "
-                             "*.txt-File that contains the filenames (separated by newline). "
-                             "Can be abspaths or relpaths to the workdir.")
+    required.add_argument("-v", "--visuals", type=str, required=True,
+                          help="Comma-separated list of the unscaled (!) visuals, or alternatively the name of a "
+                               "*.txt-File that contains the filenames (separated by newline). "
+                               "Can be abspaths or relpaths to the workdir.")
 
-    parser.add_argument("-a", "--audio", type=str, required=False,
-                        help="Name of the audio-file. Can be an abspath or a relpath to the workdir. "
-                             "If no audio-file is specified, the bpm / length of the song/reel "
-                             "must be specified by the other arguments.")
+    optional.add_argument("-a", "--audio", type=str, required=False,
+                          help="Name of the audio-file. Can be an abspath or a relpath to the workdir. "
+                               "If no audio-file is specified, the bpm / length of the song/reel "
+                               "must be specified by the other arguments.")
 
-    parser.add_argument("-bpm", "--beats_per_minute", type=float, required=False,
-                        help="If no audio-file is specified, the beats per minute of the song/reel must be specified.")
+    optional.add_argument("-bpm", "--beats_per_minute", type=float, required=False,
+                          help="If no audio-file is specified, the beats per minute of the song/reel must be specified.")
 
-    parser.add_argument("-len", "--length", type=float, required=False,
-                        help="If no audio-file is specified, "
-                             "the length of the song/reel must be specified (in seconds).")
+    optional.add_argument("-len", "--length", type=float, required=False,
+                          help="If no audio-file is specified, "
+                               "the length of the song/reel must be specified (in seconds).")
 
-    parser.add_argument("-w", "--workdir", type=str, default=os.getcwd(),
-                        help="The working directory where the output files are stored. "
-                             "If the input-files are passed as relpaths, the workdir serves as root. "
-                             "If not specified, the current python working directory is used ('os.getcwd()').")
+    optional.add_argument("-w", "--workdir", type=str, default=os.getcwd(),
+                          help="The working directory where the output files are stored. "
+                               "If the input-files are passed as relpaths, the workdir serves as root. "
+                               "If not specified, the current python working directory is used ('os.getcwd()').")
 
-    parser.add_argument("-log", "--loglevel", choices=LOG_LEVELS, default=LOG_LEVEL_INFO,
-                        help="Specify what log-messages shall be written.")
+    optional.add_argument("-log", "--loglevel", choices=LOG_LEVELS, default=LOG_LEVEL_INFO,
+                          help="Specify what log-messages shall be written.")
 
-    parser.add_argument("-uasv", "--use_already_scaled_visuals", type=bool, default=False,
-                        help="Set true, if the visuals have already been scaled and those scaled visuals "
-                             "shall be re-used in order to skip the scaling-process.")
+    optional.add_argument("-uasv", "--use_already_scaled_visuals", type=bool, default=False,
+                          help="Set true, if the visuals have already been scaled and those scaled visuals "
+                               "shall be re-used in order to skip the scaling-process.")
 
     args = parser.parse_args()
 
