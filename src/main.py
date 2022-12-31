@@ -13,10 +13,10 @@ LOG_LEVEL_DEBUG = "DEBUG"
 LOG_LEVELS = [LOG_LEVEL_INFO, LOG_LEVEL_DEBUG]
 
 
-def setup_logger(loglevel, workdir):
+def setup_logger(loglevel):
     now_string = datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
     logfile = f'make_reel_{now_string}.log'
-    logging.basicConfig(filename=os.path.join(workdir, logfile), level=loglevel)
+    logging.basicConfig(filename=logfile, level=loglevel)
     logging.getLogger().addHandler(logging.StreamHandler(sys.stdout))
 
 
@@ -30,11 +30,15 @@ def main():
     loglevel = args.loglevel
     use_already_scaled_images = args.use_already_scaled_images
 
-    setup_logger(loglevel, workdir)
+    os.chdir(workdir)
 
-    imageScaler = ImageScaler(images, workdir, use_already_scaled_images=use_already_scaled_images)
+    setup_logger(loglevel)
+
+    logging.info(f"Workdir is '{workdir}'")
+
+    imageScaler = ImageScaler(images, use_already_scaled_images=use_already_scaled_images)
     scaled_images = imageScaler.run()
-    beatEvaluator = BeatEvaluator(os.path.join(workdir, audio_file))
+    beatEvaluator = BeatEvaluator(audio_file)
     beat_times = beatEvaluator.run()
     # beat_times = BeatEvaluator.evaluate_beat_times_from_bpm(bpm = 140.09, total_duration = 7.9)
 
@@ -42,7 +46,7 @@ def main():
     # --> Durations(3): [0.9287981859410435, 0.8591383219954647, 0.8591383219954647]
 
     durations = BeatEvaluator.eval_durations_from_beat_times(beat_times)
-    reelMaker = ReelMaker(working_dir=workdir, images=scaled_images, durations=durations,
+    reelMaker = ReelMaker(images=scaled_images, durations=durations,
                           audio_file_name=audio_file)
     reelMaker.run()
 
