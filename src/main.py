@@ -56,16 +56,18 @@ def parse_arguments():
 
     #  ToDo also handle alread scaled images
     parser.add_argument("-i", "--images", type=str, required=True,
-                        help="Comma-separated list of the unscaled (!) images (relative to the workdir) "
+                        help="Comma-separated list of the unscaled (!) images. "
+                             "Can be abspaths or relpaths to the workdir. "
                              "that shall be stacked to build the reel.")  # ToDo: pass in file
 
     parser.add_argument("-a", "--audio", type=str, required=False,
-                        help="Name of the audiofile. Can also be a relpath or an abspath to the file. "
+                        help="Name of the audiofile. Can be an abspath or a relpath to the workdir. "
                              "If no audiofile is specified, the bpm / duration of the song "
                              "need to be specified by the other arguments.")  # ToDo: implement bpm / duration argument
 
     parser.add_argument("-w", "--workdir", type=str, default=os.getcwd(),
-                        help="The working directory where all input and output files are stored. "
+                        help="The working directory where the output files are stored. "
+                             "If the input-files are passed as relpaths, the workdir serves as root. "
                              "If not specified, the current python working directory is used ('os.getcwd()').")
 
     parser.add_argument("-l", "--loglevel", choices=LOG_LEVELS, default=LOG_LEVEL_INFO,
