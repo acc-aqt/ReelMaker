@@ -14,8 +14,8 @@ LOG_LEVELS = [LOG_LEVEL_INFO, LOG_LEVEL_DEBUG]
 
 LOG_DIR = "reel-maker-logs"
 
-def setup_logger(loglevel):
 
+def setup_logger(loglevel):
     os.makedirs(LOG_DIR, exist_ok=True)
     now_string = datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
     logfile = f'make_reel_{now_string}.log'
@@ -48,7 +48,7 @@ def main():
 
 
 def evaluate_images(arg_images):
-    if arg_images.endswith(".txt"):
+    if arg_images.endswith(".txt"):  # evaluate images from text file
         dir_text_file = os.path.dirname(arg_images)
         with open(arg_images, "r") as fin:
             lines = [line.rstrip() for line in fin]
@@ -58,7 +58,7 @@ def evaluate_images(arg_images):
                     images.append(line)
                 else:
                     images.append(os.path.join(dir_text_file, line))
-    else:
+    else:  # evaluate directly from passed input string. comma separated list.
         images = arg_images.split(",")
 
     logging.info(f"{len(images)} images serve as input for the reel.")
