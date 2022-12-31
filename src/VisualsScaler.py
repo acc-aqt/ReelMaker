@@ -40,7 +40,7 @@ class VisualsScaler:
 
     def __get_width_hight_to_scale(self, scale_type="fixed"):
         if scale_type == "fixed":  # height 1920 px ; aspect ratio 9:16
-            height_to_scale = 200  # ToDo: set back to 1920
+            height_to_scale = 1920
             width_to_scale = int(height_to_scale * 9 / 16)
         elif scale_type == "fit2smallest":  # scale all visuals to visual with smallest height
             width_to_scale = 1e9
