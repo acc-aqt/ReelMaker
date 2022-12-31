@@ -1,27 +1,11 @@
 import argparse
-import datetime
 import logging
 import os
-import sys
 
 from BeatEvaluator import BeatEvaluator
 from ImageScaler import ImageScaler
 from ReelMaker import ReelMaker
-
-LOG_LEVEL_INFO = "INFO"
-LOG_LEVEL_DEBUG = "DEBUG"
-LOG_LEVELS = [LOG_LEVEL_INFO, LOG_LEVEL_DEBUG]
-
-LOG_DIR = "reel-maker-logs"
-
-
-def setup_logger(loglevel):
-    os.makedirs(LOG_DIR, exist_ok=True)
-    now_string = datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
-    logfile = f'make_reel_{now_string}.log'
-    logging.basicConfig(filename=os.path.join(LOG_DIR, logfile), level=loglevel)
-    logging.getLogger().addHandler(logging.StreamHandler(sys.stdout))
-
+from setup_logger import LOG_LEVEL_INFO, LOG_LEVELS, setup_logger
 
 def main():
     args = parse_arguments()
