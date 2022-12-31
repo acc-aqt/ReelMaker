@@ -1,7 +1,6 @@
 import logging
 import os
 from itertools import cycle, islice
-
 from moviepy import editor as mpe
 
 from filename_helpers import is_image, is_video, get_lower_case_file_suffix, get_versioned_file_path
@@ -18,13 +17,9 @@ class ReelMaker:
 
         if self.audio_file_name:
             audio_base_name = os.path.basename(self.audio_file_name).split('.')[0]
-            self.video_without_audio = get_versioned_file_path(
-                base_name + "_NO_AUDIO_" + audio_base_name + self.VIDEO_EXTENSION)
-            self.video_with_audio = get_versioned_file_path(
-                base_name + "_WITH_AUDIO_" + audio_base_name + self.VIDEO_EXTENSION)
+            self.reel_name = get_versioned_file_path(base_name + "_" + audio_base_name + self.VIDEO_EXTENSION)
         else:
-            self.video_without_audio = get_versioned_file_path(base_name + "_NO_AUDIO" + self.VIDEO_EXTENSION)
-            self.video_with_audio = None
+            self.reel_name = get_versioned_file_path(base_name + self.VIDEO_EXTENSION)
 
     def run(self):
         self.__stack_visuals_to_video()
@@ -57,18 +52,26 @@ class ReelMaker:
                               f"File {visual} cannot be added to reel!")
 
         video = mpe.concatenate_videoclips(clips)  # method = "compose" ?
-        video.write_videofile(self.video_without_audio, fps=60)  # ToDo: what fps to use?
+        video.write_videofile(self.reel_name, fps=60)  # ToDo: what fps to use?
 
-        logging.info(f"Released video (without audio) --> {self.video_without_audio}")
+        logging.info(f"Released video (without audio) --> {self.reel_name}")
 
     def __add_audio_to_video(self):
         logging.info("About to add audio...")
 
-        videoclip = mpe.VideoFileClip(self.video_without_audio)
+        temp_file_no_audio = "temp_reel_no_audio" + self.VIDEO_EXTENSION
+        if os.path.isfile(temp_file_no_audio):
+            os.remove(temp_file_no_audio)
+            logging.debug(f"Removed temp file {temp_file_no_audio}")
+
+        os.rename(self.reel_name, temp_file_no_audio)
+
+        videoclip = mpe.VideoFileClip(temp_file_no_audio)
         audioclip = mpe.AudioFileClip(self.audio_file_name)
 
         total_duration = min(videoclip.duration,
                              audioclip.duration)
+
         logging.debug(f"Video-Duration: {videoclip.duration}; Audio Duration: {audioclip.duration} "
                       f"--> crop both to {total_duration}")
 
@@ -76,10 +79,16 @@ class ReelMaker:
         videoclip = videoclip.subclip(0, total_duration)
 
         videoclip_with_audio = videoclip.set_audio(audioclip)
-        videoclip_with_audio.write_videofile(self.video_with_audio)
+        videoclip_with_audio.write_videofile(self.reel_name)
+
+        logging.info(f"Wrote file with audio --> {self.reel_name}")
 
         audioclip.close()
         videoclip.close()
         videoclip_with_audio.close()
 
-        logging.info(f"Wrote file with audio --> {self.video_with_audio}")
+        os.remove(temp_file_no_audio)
+
+        logging.debug(f"Closed clips and remove temp-file '{temp_file_no_audio}'")
+
+
