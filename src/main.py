@@ -26,28 +26,23 @@ def setup_logger(loglevel):
 def main():
     args = parse_arguments()
 
-    workdir = args.workdir
+    os.chdir(args.workdir)
 
-    audio_file = args.audio
+    setup_logger(args.loglevel)
+
+    logging.info(f"Workdir is '{args.workdir}'")
+
     images = args.images.split(",")
-    loglevel = args.loglevel
-    use_already_scaled_images = args.use_already_scaled_images
 
-    os.chdir(workdir)
-
-    setup_logger(loglevel)
-
-    logging.info(f"Workdir is '{workdir}'")
-
-    imageScaler = ImageScaler(images, use_already_scaled_images=use_already_scaled_images)
+    imageScaler = ImageScaler(images, use_already_scaled_images=args.use_already_scaled_images)
     scaled_images = imageScaler.run()
-    beatEvaluator = BeatEvaluator(audio_file)
+    beatEvaluator = BeatEvaluator(args.audio)
     beat_times = beatEvaluator.run()
     # beat_times = BeatEvaluator.evaluate_beat_times_from_bpm(bpm = 140.09, total_duration = 7.9)
 
     durations = BeatEvaluator.eval_durations_from_beat_times(beat_times)
     reelMaker = ReelMaker(images=scaled_images, durations=durations,
-                          audio_file_name=audio_file)
+                          audio_file_name=args.audio)
     reelMaker.run()
 
 
