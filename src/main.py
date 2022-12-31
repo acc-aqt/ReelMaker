@@ -32,7 +32,8 @@ def main():
 
     logging.info(f"Workdir is '{args.workdir}'")
 
-    images = args.images.split(",")
+    images = evaluate_images(args.images)
+
     imageScaler = ImageScaler(images, use_already_scaled_images=args.use_already_scaled_images)
     scaled_images = imageScaler.run()
 
@@ -47,6 +48,27 @@ def main():
     reelMaker.run()
 
 
+def evaluate_images(args_images):
+    if args_images.endswith(".txt"):
+        dir_text_file = os.path.dirname(args_images)
+        with open(args_images, "r") as fin:
+            lines = [line.rstrip() for line in fin]
+            images = []
+            for line in lines:
+                if os.path.isabs(line):
+                    images.append(line)
+                else:
+                    images.append(os.path.join(dir_text_file, line))
+    else:
+        images = args_images.split(",")
+
+    logging.info(f"{len(images)} images serve as input for the reel.")
+    for index, image in enumerate(images):
+        logging.debug(f"Image #{index+1}: {image}")
+
+    return images
+
+
 def parse_arguments():
     description = "A tool to create videos ('reels') based on a set of images and an audio file. " \
                   "From the audio file, the rhythm is automatically processed, " \
@@ -56,9 +78,9 @@ def parse_arguments():
 
     #  ToDo also handle alread scaled images
     parser.add_argument("-i", "--images", type=str, required=True,
-                        help="Comma-separated list of the unscaled (!) images. "
-                             "Can be abspaths or relpaths to the workdir. "
-                             "that shall be stacked to build the reel.")  # ToDo: pass in file
+                        help="Comma-separated list of the unscaled (!) images, or alternatively the name of a "
+                             "*.txt-File that contains the filenames (separated by newline). "
+                             "Can be abspaths or relpaths to the workdir.")
 
     parser.add_argument("-a", "--audio", type=str, required=False,
                         help="Name of the audiofile. Can be an abspath or a relpath to the workdir. "
