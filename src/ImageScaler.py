@@ -20,6 +20,8 @@ class ImageScaler:
             self.__remove_already_scaled_images()
             width, height = self.__get_width_hight_to_scale()
             self.__scale_images(width, height)
+        else:
+            logging.info("No images will be scaled. Using already scaled images.")
 
         logging.debug(f"Number of scaled images: {len(self.scaled_images)}")
         return self.scaled_images
