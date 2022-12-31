@@ -29,7 +29,6 @@ def main():
     os.chdir(args.workdir)
 
     setup_logger(args.loglevel)
-
     logging.info(f"Workdir is '{args.workdir}'")
 
     images = evaluate_images(args.images)
@@ -48,10 +47,10 @@ def main():
     reelMaker.run()
 
 
-def evaluate_images(args_images):
-    if args_images.endswith(".txt"):
-        dir_text_file = os.path.dirname(args_images)
-        with open(args_images, "r") as fin:
+def evaluate_images(arg_images):
+    if arg_images.endswith(".txt"):
+        dir_text_file = os.path.dirname(arg_images)
+        with open(arg_images, "r") as fin:
             lines = [line.rstrip() for line in fin]
             images = []
             for line in lines:
@@ -60,7 +59,7 @@ def evaluate_images(args_images):
                 else:
                     images.append(os.path.join(dir_text_file, line))
     else:
-        images = args_images.split(",")
+        images = arg_images.split(",")
 
     logging.info(f"{len(images)} images serve as input for the reel.")
     for index, image in enumerate(images):
