@@ -33,14 +33,15 @@ def main():
     logging.info(f"Workdir is '{args.workdir}'")
 
     images = args.images.split(",")
-
     imageScaler = ImageScaler(images, use_already_scaled_images=args.use_already_scaled_images)
     scaled_images = imageScaler.run()
+
     beatEvaluator = BeatEvaluator(args.audio)
     beat_times = beatEvaluator.run()
     # beat_times = BeatEvaluator.evaluate_beat_times_from_bpm(bpm = 140.09, total_duration = 7.9)
 
     durations = BeatEvaluator.eval_durations_from_beat_times(beat_times)
+
     reelMaker = ReelMaker(images=scaled_images, durations=durations,
                           audio_file_name=args.audio)
     reelMaker.run()
@@ -59,7 +60,8 @@ def parse_arguments():
                              "that shall be stacked to build the reel.")  # ToDo: pass in file
 
     parser.add_argument("-a", "--audio", type=str, required=False,
-                        help="Name of the audiofile. If no audiofile is specified, the bpm / duration of the song "
+                        help="Name of the audiofile. Can also be a relpath or an abspath to the file. "
+                             "If no audiofile is specified, the bpm / duration of the song "
                              "need to be specified by the other arguments.")  # ToDo: implement bpm / duration argument
 
     parser.add_argument("-w", "--workdir", type=str, default=os.getcwd(),

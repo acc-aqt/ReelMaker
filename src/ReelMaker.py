@@ -15,9 +15,9 @@ class ReelMaker:
         self.durations = durations
         self.audio_file_name = audio_file_name
 
-        audio_file_base_name = self.audio_file_name.split(".")[0]
-        self.video_without_audio = base_name + "_TEMP_NO_AUDIO_" + audio_file_base_name + self.VIDEO_EXTENSION
-        self.video_with_audio = base_name + "_WITH_AUDIO_" + audio_file_base_name + self.VIDEO_EXTENSION
+        audio_base_name = os.path.basename(self.audio_file_name).split('.')[0]
+        self.video_without_audio = base_name + "_NO_AUDIO_" + audio_base_name + self.VIDEO_EXTENSION
+        self.video_with_audio = base_name + "_WITH_AUDIO_" + audio_base_name + self.VIDEO_EXTENSION
 
     def run(self):
         self.__stack_images_to_video()
