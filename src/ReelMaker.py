@@ -4,7 +4,7 @@ from itertools import cycle, islice
 
 from moviepy import editor as mpe
 
-from helpers import is_image, is_video, get_lower_case_file_suffix
+from filename_helpers import is_image, is_video, get_lower_case_file_suffix, get_versioned_file_path
 
 
 class ReelMaker:
@@ -18,10 +18,12 @@ class ReelMaker:
 
         if self.audio_file_name:
             audio_base_name = os.path.basename(self.audio_file_name).split('.')[0]
-            self.video_without_audio = base_name + "_NO_AUDIO_" + audio_base_name + self.VIDEO_EXTENSION
-            self.video_with_audio = base_name + "_WITH_AUDIO_" + audio_base_name + self.VIDEO_EXTENSION
+            self.video_without_audio = get_versioned_file_path(
+                base_name + "_NO_AUDIO_" + audio_base_name + self.VIDEO_EXTENSION)
+            self.video_with_audio = get_versioned_file_path(
+                base_name + "_WITH_AUDIO_" + audio_base_name + self.VIDEO_EXTENSION)
         else:
-            self.video_without_audio = base_name + "_NO_AUDIO" + self.VIDEO_EXTENSION
+            self.video_without_audio = get_versioned_file_path(base_name + "_NO_AUDIO" + self.VIDEO_EXTENSION)
             self.video_with_audio = None
 
     def run(self):
@@ -31,16 +33,12 @@ class ReelMaker:
             self.__add_audio_to_video()
 
     def __stack_visuals_to_video(self):
-        if os.path.isfile(self.video_without_audio):
-            os.remove(self.video_without_audio)
-            logging.debug(f"Removed file {self.video_without_audio}")
-
         logging.info("Stack visuals to make video (without audio)...")
 
         clips = []
 
-        visuals_to_stack = list(
-            islice(cycle(self.visuals), len(self.durations)))  # repeat list of visuals until all durations are used
+        # repeat list of visuals until all durations are used
+        visuals_to_stack = list(islice(cycle(self.visuals), len(self.durations)))
         for i, duration in enumerate(self.durations):
             visual = visuals_to_stack[i]
             if is_image(visual):
@@ -65,10 +63,6 @@ class ReelMaker:
 
     def __add_audio_to_video(self):
         logging.info("About to add audio...")
-
-        if os.path.isfile(self.video_with_audio):
-            os.remove(self.video_with_audio)
-            logging.debug(f"Removed file {self.video_with_audio}")
 
         videoclip = mpe.VideoFileClip(self.video_without_audio)
         audioclip = mpe.AudioFileClip(self.audio_file_name)

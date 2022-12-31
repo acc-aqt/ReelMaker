@@ -5,7 +5,7 @@ import cv2
 from PIL import Image
 from moviepy import editor as mpe
 
-from helpers import is_image, is_video, get_lower_case_file_suffix
+from filename_helpers import is_image, is_video, get_lower_case_file_suffix
 
 
 class VisualsScaler:
@@ -58,7 +58,6 @@ class VisualsScaler:
         return width_to_scale, height_to_scale
 
     # ToDo: could be a static method
-
     def __scale_visuals(self, width, height):
         logging.info("About to scale visuals...")
         for unscaled_visual, scaled_visual in zip(self.unscaled_visuals, self.scaled_visuals):
