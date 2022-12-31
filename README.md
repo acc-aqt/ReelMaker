@@ -16,10 +16,10 @@ bpm / duration of the song can be specified.
 
 required arguments:
   -v VISUALS, --visuals VISUALS
-                        Comma-separated list of the unscaled (!) visuals, or
-                        alternatively the name of a *.txt-File that contains
-                        the filenames (separated by newline). Can be abspaths
-                        or relpaths to the workdir.
+                        Comma-separated list of the visuals, or alternatively
+                        the name of a *.txt-File that contains the filenames
+                        (separated by newline). Can be abspaths or relpaths to
+                        the workdir.
 
 optional arguments:
   -a AUDIO, --audio AUDIO
@@ -44,4 +44,5 @@ optional arguments:
                         Set true, if the visuals have already been scaled and
                         those scaled visuals shall be re-used in order to skip
                         the scaling-process.
+
   ```
