@@ -3,6 +3,8 @@ import os
 from itertools import cycle, islice
 from moviepy import editor as mpe
 
+
+from helpers import remove_file
 from filename_helpers import is_image, is_video, get_lower_case_file_suffix, get_versioned_file_path
 
 
@@ -60,9 +62,7 @@ class ReelMaker:
         logging.info("About to add audio...")
 
         temp_file_no_audio = "temp_reel_no_audio" + self.VIDEO_EXTENSION
-        if os.path.isfile(temp_file_no_audio):
-            os.remove(temp_file_no_audio)
-            logging.debug(f"Removed temp file {temp_file_no_audio}")
+        remove_file(temp_file_no_audio)
 
         os.rename(self.reel_name, temp_file_no_audio)
 
@@ -87,7 +87,7 @@ class ReelMaker:
         videoclip.close()
         videoclip_with_audio.close()
 
-        os.remove(temp_file_no_audio)
+        remove_file(temp_file_no_audio)
 
         logging.debug(f"Closed clips and remove temp-file '{temp_file_no_audio}'")
 

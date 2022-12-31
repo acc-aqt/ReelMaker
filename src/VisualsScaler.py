@@ -5,6 +5,7 @@ import cv2
 from PIL import Image
 from moviepy import editor as mpe
 
+from helpers import remove_file
 from filename_helpers import is_image, is_video, get_lower_case_file_suffix
 
 
@@ -35,8 +36,7 @@ class VisualsScaler:
                                     if (is_video(vis) or is_image(vis)) and "scaled" in vis]
 
         for visual_to_remove in scaled_visuals_to_remove:
-            os.remove(visual_to_remove)
-            logging.debug(f"Removed {visual_to_remove}")
+            remove_file(visual_to_remove)
 
     def __get_width_hight_to_scale(self, scale_type="fixed"):
         if scale_type == "fixed":  # height 1920 px ; aspect ratio 9:16
