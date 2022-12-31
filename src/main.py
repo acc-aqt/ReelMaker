@@ -42,9 +42,6 @@ def main():
     beat_times = beatEvaluator.run()
     # beat_times = BeatEvaluator.evaluate_beat_times_from_bpm(bpm = 140.09, total_duration = 7.9)
 
-    # ToDo bugfix: Evaluated 4 beat times from .wav: [3.76163265 4.69043084 5.54956916 6.40870748]
-    # --> Durations(3): [0.9287981859410435, 0.8591383219954647, 0.8591383219954647]
-
     durations = BeatEvaluator.eval_durations_from_beat_times(beat_times)
     reelMaker = ReelMaker(images=scaled_images, durations=durations,
                           audio_file_name=audio_file)
