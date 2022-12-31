@@ -67,7 +67,7 @@ class VisualsScaler:
                 new_image.save(scaled_visual, quality=self.SCALED_IMAGE_QUALITY)
                 logging.debug(f"Saved scaled image {scaled_visual}")
             elif is_video(unscaled_visual):
-                # ToDo: only downsclaing works, so higher resolution images may make a problem --> throw exception
+                # ToDo: only downscaling works, so higher resolution images may make a problem --> throw exception
                 clip = mpe.VideoFileClip(unscaled_visual)
                 clip_resized = clip.resize(height=height,
                                            width=width)
@@ -78,4 +78,4 @@ class VisualsScaler:
                 raise IOError(f"Scaling not implemented for files of type '{file_suffix}'. "
                               f"File {unscaled_visual} cannot be scaled!")
 
-            logging.info("Finished scaling of visuals!")
+        logging.info("Finished scaling of visuals!")
