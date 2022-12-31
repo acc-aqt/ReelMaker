@@ -3,7 +3,7 @@ import logging
 import os
 
 from BeatEvaluator import BeatEvaluator
-from ImageScaler import ImageScaler
+from VisualsScaler import VisualsScaler
 from ReelMaker import ReelMaker
 from setup_logger import LOG_LEVEL_INFO, LOG_LEVELS, setup_logger
 
@@ -15,10 +15,10 @@ def main():
     setup_logger(args.loglevel)
     logging.info(f"Workdir is '{args.workdir}'")
 
-    images = evaluate_images(args.images)
+    visuals = evaluate_visuals(args.visuals)
 
-    imageScaler = ImageScaler(images, use_already_scaled_images=args.use_already_scaled_images)
-    scaled_images = imageScaler.run()
+    visualsScaler = VisualsScaler(visuals, use_already_scaled_visuals=args.use_already_scaled_visuals)
+    scaled_visuals = visualsScaler.run()
 
     if args.beats_per_minute and args.length:
         beat_times = BeatEvaluator.evaluate_beat_times_from_bpm(bpm=args.beats_per_minute, length=args.length)
@@ -28,42 +28,42 @@ def main():
 
     durations = BeatEvaluator.eval_durations_from_beat_times(beat_times)
 
-    reelMaker = ReelMaker(images=scaled_images, durations=durations,
+    reelMaker = ReelMaker(visuals=scaled_visuals, durations=durations,
                           audio_file_name=args.audio)
     reelMaker.run()
 
 
-def evaluate_images(arg_images):
-    if arg_images.endswith(".txt"):  # evaluate images from text file
-        dir_text_file = os.path.dirname(arg_images)
-        with open(arg_images, "r") as fin:
+def evaluate_visuals(arg_visuals):
+    if arg_visuals.endswith(".txt"):  # evaluate visuals from text file
+        dir_text_file = os.path.dirname(arg_visuals)
+        with open(arg_visuals, "r") as fin:
             lines = [line.rstrip() for line in fin]
-            images = []
+            visuals = []
             for line in lines:
                 if os.path.isabs(line):
-                    images.append(line)
+                    visuals.append(line)
                 else:
-                    images.append(os.path.join(dir_text_file, line))
+                    visuals.append(os.path.join(dir_text_file, line))
     else:  # evaluate directly from passed input string. comma separated list.
-        images = arg_images.split(",")
+        visuals = arg_visuals.split(",")
 
-    logging.info(f"{len(images)} images serve as input for the reel.")
-    for index, image in enumerate(images):
-        logging.debug(f"Image #{index+1}: {image}")
+    logging.info(f"{len(visuals)} visuals serve as input for the reel.")
+    for index, visual in enumerate(visuals):
+        logging.debug(f"Visual #{index+1}: {visual}")
 
-    return images
+    return visuals
 
 
 def parse_arguments():
-    description = "A tool to create videos ('reels') based on a set of images and an audio file. " \
+    description = "A tool to create videos/reels based on a set of visuals (images and videos) and an audio file. " \
                   "From the audio file, the rhythm is automatically processed, " \
-                  "so that the images are displayed according to the beat. " \
+                  "so that the visuals are displayed according to the beat. " \
                   "Alternatively, the bpm / duration of the song can be specified."
     parser = argparse.ArgumentParser(prog="ReelMaker", description=description)
 
-    #  ToDo also handle alread scaled images
-    parser.add_argument("-i", "--images", type=str, required=True,
-                        help="Comma-separated list of the unscaled (!) images, or alternatively the name of a "
+    #  ToDo also handle alread scaled visuals
+    parser.add_argument("-v", "--visuals", type=str, required=True,
+                        help="Comma-separated list of the unscaled (!) visuals, or alternatively the name of a "
                              "*.txt-File that contains the filenames (separated by newline). "
                              "Can be abspaths or relpaths to the workdir.")
 
@@ -87,8 +87,8 @@ def parse_arguments():
     parser.add_argument("-log", "--loglevel", choices=LOG_LEVELS, default=LOG_LEVEL_INFO,
                         help="Specify what log-messages shall be written.")
 
-    parser.add_argument("-uasi", "--use_already_scaled_images", type=bool, default=False,
-                        help="Set true, if the images have already been scaled and those scaled images "
+    parser.add_argument("-uasv", "--use_already_scaled_visuals", type=bool, default=False,
+                        help="Set true, if the visuals have already been scaled and those scaled visuals "
                              "shall be re-used in order to skip the scaling-process.")
 
     args = parser.parse_args()

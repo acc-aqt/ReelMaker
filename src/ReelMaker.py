@@ -10,8 +10,8 @@ class ReelMaker:
     VIDEO_EXTENSION = ".mp4"  # reels work best with mp4
     FRAMES_PER_SECOND = 100
 
-    def __init__(self, images, durations, audio_file_name="", base_name="reel"):
-        self.images = images
+    def __init__(self, visuals, durations, audio_file_name="", base_name="reel"):
+        self.visuals = visuals
         self.durations = durations
         self.audio_file_name = audio_file_name
 
@@ -24,17 +24,17 @@ class ReelMaker:
             self.video_with_audio = None
 
     def run(self):
-        self.__stack_images_to_video()
+        self.__stack_visuals_to_video()
 
         if self.audio_file_name:
             self.__add_audio_to_video()
 
-    def __stack_images_to_video(self):
+    def __stack_visuals_to_video(self):
         if os.path.isfile(self.video_without_audio):
             os.remove(self.video_without_audio)
             logging.debug(f"Removed file {self.video_without_audio}")
 
-        logging.info("Stack images to make video (without audio)...")
+        logging.info("Stack visuals to make video (without audio)...")
 
         height, width = self.get_height_width()
 
@@ -42,12 +42,12 @@ class ReelMaker:
 
         video = cv2.VideoWriter(self.video_without_audio, fourcc, self.FRAMES_PER_SECOND, (width, height))
 
-        images_to_stack = list(islice(cycle(self.images), len(self.durations))) # repeat list of images until all durations are used
+        visuals_to_stack = list(islice(cycle(self.visuals), len(self.durations))) # repeat list of visuals until all durations are used
         for i, duration in enumerate(self.durations):
-            logging.debug(f"Stack image {i +1} / {len(self.durations)}...")
+            logging.debug(f"Stack visual {i +1} / {len(self.durations)}...")
             frames = int(duration * self.FRAMES_PER_SECOND)
             for frame in range(frames):
-                video.write(cv2.imread(images_to_stack[i]))
+                video.write(cv2.imread(visuals_to_stack[i]))
 
         logging.debug("Finished stacking!")
         cv2.destroyAllWindows()
@@ -55,7 +55,7 @@ class ReelMaker:
         logging.info(f"Released video (without audio) --> {self.video_without_audio}")
 
     def get_height_width(self):
-        frame = cv2.imread(self.images[0])
+        frame = cv2.imread(self.visuals[0])
         height, width, _ = frame.shape
         return height, width
 
