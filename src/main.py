@@ -36,9 +36,11 @@ def main():
     imageScaler = ImageScaler(images, use_already_scaled_images=args.use_already_scaled_images)
     scaled_images = imageScaler.run()
 
-    beatEvaluator = BeatEvaluator(args.audio)
-    beat_times = beatEvaluator.run()
-    # beat_times = BeatEvaluator.evaluate_beat_times_from_bpm(bpm = 140.09, total_duration = 7.9)
+    if args.beats_per_minute and args.length:
+        beat_times = BeatEvaluator.evaluate_beat_times_from_bpm(bpm=args.beats_per_minute, length=args.length)
+    else:
+        beatEvaluator = BeatEvaluator(args.audio)
+        beat_times = beatEvaluator.run()
 
     durations = BeatEvaluator.eval_durations_from_beat_times(beat_times)
 
@@ -82,16 +84,23 @@ def parse_arguments():
                              "Can be abspaths or relpaths to the workdir.")
 
     parser.add_argument("-a", "--audio", type=str, required=False,
-                        help="Name of the audiofile. Can be an abspath or a relpath to the workdir. "
-                             "If no audiofile is specified, the bpm / duration of the song "
-                             "need to be specified by the other arguments.")  # ToDo: implement bpm / duration argument
+                        help="Name of the audio-file. Can be an abspath or a relpath to the workdir. "
+                             "If no audio-file is specified, the bpm / length of the song/reel "
+                             "must be specified by the other arguments.")
+
+    parser.add_argument("-bpm", "--beats_per_minute", type=float, required=False,
+                        help="If no audio-file is specified, the beats per minute of the song/reel must be specified.")
+
+    parser.add_argument("-len", "--length", type=float, required=False,
+                        help="If no audio-file is specified, "
+                             "the length of the song/reel must be specified (in seconds).")
 
     parser.add_argument("-w", "--workdir", type=str, default=os.getcwd(),
                         help="The working directory where the output files are stored. "
                              "If the input-files are passed as relpaths, the workdir serves as root. "
                              "If not specified, the current python working directory is used ('os.getcwd()').")
 
-    parser.add_argument("-l", "--loglevel", choices=LOG_LEVELS, default=LOG_LEVEL_INFO,
+    parser.add_argument("-log", "--loglevel", choices=LOG_LEVELS, default=LOG_LEVEL_INFO,
                         help="Specify what log-messages shall be written.")
 
     parser.add_argument("-uasi", "--use_already_scaled_images", type=bool, default=False,
@@ -99,6 +108,11 @@ def parse_arguments():
                              "shall be re-used in order to skip the scaling-process.")
 
     args = parser.parse_args()
+
+    if not args.audio and not (args.length and args.beats_per_minute):
+        raise IOError("If no audio-file is specified, then both the beats-per-minute, "
+                      "as well as the length of the song/reel need to be specified.")
+
     return args
 
 

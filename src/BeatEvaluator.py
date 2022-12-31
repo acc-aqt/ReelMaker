@@ -78,21 +78,25 @@ class BeatEvaluator:
 
     @staticmethod
     def eval_durations_from_beat_times(beat_times):
-        # ToDo: das geht schoener...
-        beat_times = [0] + beat_times
-        durations = [beat_times[n] - beat_times[n - 1] for n in range(1, len(beat_times))]
-        durations = [beat_times[0]] + durations
+        durations = []
+        for index in range(len(beat_times)):
+            if index == 0:
+                durations.append(beat_times[0])
+            else:
+                durations.append(beat_times[index] - beat_times[index-1])
+
         logging.info(f"Durations ({len(durations)}): {durations}")
-        logging.debug(f"Total duration: {sum(durations)}")
+        logging.info(f"Total duration: {sum(durations)}")
         return durations
 
     @staticmethod
-    def evaluate_beat_times_from_bpm(bpm, total_duration):
+    def evaluate_beat_times_from_bpm(bpm, length):
+        logging.info(f"Evaluate beat times by bpm ({bpm}) and length ({length}s)")
         bps = bpm / 60
         single_duration = 1 / bps
-        number_of_beats = math.floor(total_duration / single_duration)
+        number_of_beats = math.floor(length / single_duration)
         beat_times = []
         for i in range(1, 1 + number_of_beats):
             beat_times.append(i * single_duration)
-        beat_times.append(total_duration)  # append total duration as last beat in order to use whole length of audio
+        logging.info(f"Evaluated {len(beat_times)} beat times: {beat_times}")
         return beat_times
