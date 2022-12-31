@@ -1,11 +1,11 @@
 import logging
 import os
 from itertools import cycle, islice
+
 from moviepy import editor as mpe
 
-
-from helpers import remove_file
 from filename_helpers import is_image, is_video, get_lower_case_file_suffix, get_versioned_file_path
+from helpers import remove_file
 
 
 class ReelMaker:
@@ -90,5 +90,3 @@ class ReelMaker:
         remove_file(temp_file_no_audio)
 
         logging.debug(f"Closed clips and remove temp-file '{temp_file_no_audio}'")
-
-
