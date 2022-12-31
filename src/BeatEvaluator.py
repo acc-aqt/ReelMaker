@@ -25,9 +25,10 @@ class BeatEvaluator:
         self.__path_to_temp_wav_file = os.path.join(self.__workdir, self.__temp_wav_file)
 
     def run(self):
-        self.__remove_temp_wav()
+
         self.__create_temp_wav()
         beat_times = self.__evaluate_beat_times_from_wav()
+        self.__remove_temp_wav()
         return beat_times
 
     def __evaluate_beat_times_from_wav(self):
@@ -54,6 +55,8 @@ class BeatEvaluator:
         return duration
 
     def __create_temp_wav(self):
+        self.__remove_temp_wav()
+
         logging.info(f"About to convert {self.path_to_input_file} to {self.__path_to_temp_wav_file}...")
 
         if self.path_to_input_file.endswith(".wav"):
