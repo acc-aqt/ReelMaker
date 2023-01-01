@@ -20,7 +20,7 @@ class WavConverter:
     @staticmethod
     def convert(input_file, output_file):
         if get_lower_case_file_suffix(output_file) != WAV_SUFFIX:
-            raise IOError(f"Invalid name for output file '{output_file}'. Must must have suffix '{WAV_SUFFIX}'. ")
+            raise IOError(f"Invalid name for output file '{output_file}'. Must have suffix '{WAV_SUFFIX}'. ")
 
         remove_file(output_file)
 
@@ -35,17 +35,15 @@ class WavConverter:
             WavConverter.__convert_from_mp4(input_file, output_file)
         elif get_lower_case_file_suffix(input_file) == "mp3":
             WavConverter.__convert_from_mp3(input_file, output_file)
-
         else:
-            raise IOError(f"Filetype of {input} not supported for conversion to wav. "
+            raise IOError(f"Filetype of {input} not supported for conversion to {WAV_SUFFIX}. "
                           f"File must be of type {'/'.join(SUPPORTED_INPUTS)}.")
 
         logging.info("Finished conversion!")
 
     @staticmethod
     def __convert_from_mp3(input_file, output_file):
-        sound = AudioSegment.from_mp3(
-            input_file)
+        sound = AudioSegment.from_mp3(input_file)
         sound.export(output_file, format="wav")
 
     @staticmethod
